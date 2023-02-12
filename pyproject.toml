@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "bookmyshow-clone-backend-django"
+version = "0.1.0"
+description = "Backend for bookmyshow clone"
+authors = ["Nimish Kumar <nimishk642@gmail.com>"]
+readme = "README.md"
+packages = [{include = "bookmyshow_clone_backend_django"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^4.1.6"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+django-environ = "^0.9.0"
+autoflake = "^2.0.1"
+
+
+[tool.poetry.group.local.dependencies]
+psycopg2-binary = "^2.9.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
