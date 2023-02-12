@@ -15,5 +15,11 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
+    class Meta:
+        indexes = [
+            models.Index(name="usr_email_idx", fields=["email"]),
+            models.Index(name="usr_names_idx", fields=["first_name", "last_name"]),
+        ]
+
     def __str__(self):
         return self.email
