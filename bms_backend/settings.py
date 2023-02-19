@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "graphene_django",
     "core",
-    "history",
 ]
 
 MIDDLEWARE = [
@@ -123,3 +123,8 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "core.User"
+
+GRAPHENE = {
+    "SCHEMA": "core.schema.schema",
+    "ATOMIC_MUTATIONS": True,
+}
