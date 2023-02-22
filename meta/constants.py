@@ -2,12 +2,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class Languages(models.TextChoices):
-    EN = "EN", _("English")
-    HI = "HI", _("Hindi")
+class Genders(models.IntegerChoices):
+    MALE = 0, _("Male")
+    FEMALE = 1, _("Female")
+    TRANS = 2, _("Trans")
 
 
-class Priority(models.IntegerChoices):
+class Priorities(models.IntegerChoices):
     HI = 3
     MD = 2
     LO = 1
@@ -52,3 +53,4 @@ class States(models.IntegerChoices):
     LADAKH = 34, _("Ladakh")
     LAKSHADWEEP = 35, _("Lakshadweep")
     PUDUCHERRY = 36, _("Puducherry")
+
