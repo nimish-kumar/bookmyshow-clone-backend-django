@@ -23,7 +23,7 @@ class Genre(models.Model):
 # Create your models here.
 class Facility(models.Model):
     name = models.CharField(max_length=255)
-    priority = models.IntegerField(choices=Priorities, default=Priorities.LO)
+    priority = models.IntegerField(choices=Priorities.choices, default=Priorities.LO)
 
     class Meta:
         ordering = ["-id"]
@@ -72,6 +72,6 @@ class Language(models.Model):
 
     UpperField = get_upperfield()
     lang_code = UpperField(
-        max_length=2, unique=True, validators=RegexValidator("^[A-Z]+$")
+        max_length=2, unique=True, validators=[RegexValidator("^[A-Z]+$"),]
     )
     name = models.CharField(max_length=255)

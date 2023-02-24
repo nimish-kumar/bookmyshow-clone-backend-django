@@ -130,3 +130,6 @@ dmypy.json
 
 # Tasks list
 .tasks.md
+
+# Pycharm files
+.idea

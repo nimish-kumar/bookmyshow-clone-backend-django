@@ -17,7 +17,7 @@ class MovieFormat(models.Model):
 
 class TrailerUrl(models.Model):
     movie = models.ForeignKey(
-        "Movies",
+        "Movie",
         on_delete=models.CASCADE,
         related_name="movie_trailers",
     )
@@ -37,7 +37,7 @@ class Movie(models.Model):
     release_date = models.DateField()
     format = models.ManyToManyField("MovieFormat", related_name="format_movies")
     descriptiom = models.TextField(null=True, blank=True)
-    movie_length = models.DecimalField(help_text="Movie length in hours")
+    movie_length = models.DurationField(help_text="Movie length in hours")
     lang = models.ManyToManyField(
         "meta.Language",
         related_name="lang_movies",
@@ -116,44 +116,72 @@ class BookingSlot(models.Model):
     )
     layout = models.TextField()
 
+    def create_slot_groups(self):
+        pass
 
-class Booking(models.Model):
+
+class SlotGroup(models.Model):
+    name = models.CharField(max_length=10)
+    grp_code = models.CharField(max_length=2)
+    start_rowhead = models.CharField(max_length=3)
+    end_rowhead = models.CharField(max_length=3)
+    cost = models.PositiveSmallIntegerField()
     slot = models.ForeignKey(
         "BookingSlot",
         on_delete=models.CASCADE,
-        related_name="slot_bookings",
+        related_name="slot_booking",
+    )
+
+    class Meta:
+        ordering = ["-id"]
+        indexes = [models.Index(name="slot_grp_idx", fields=["grp_code", "slot"])]
+        unique_together = ["grp_code", "slot"]
+
+
+class Booking(models.Model):
+    slot_grp = models.ForeignKey(
+        "SlotGroup",
+        on_delete=models.CASCADE,
+        related_name="slot_grp",
+        verbose_name="Theatre group",
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="user_bookings",
     )
-    seat_number = models.SmallIntegerField(validators=MinValueValidator(0))
-    grp_row_head = models.CharField(max_length=2)
+    seat_number = models.SmallIntegerField(validators=[MinValueValidator(0)])
     status = FSMIntegerField(
-        state_choices=BookingStatus.choices,
+        choices=BookingStatus.choices,
         default=BookingStatus.AVAILABLE,
         validators=[
             MinValueValidator(0),
         ],
     )
+    row = models.CharField(max_length=3)
+    column = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    paid_amt = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
-        unique_together = ["slot", "seat_number", "grp_row_head"]
+        # Orders by bookings which have been recently added/updated.
+        ordering = ["-updated_at", "-id"]
+        unique_together = ["slot_grp", "seat_number"]
         indexes = [
             models.Index(
-                "uniq_booking_idx",
-                fields=["slot", "seat_number", "grp_row_head"],
+                name="uniq_booking_idx",
+                fields=["slot_grp", "seat_number"],
             ),
-            models.Index("booking_status_idx", fields=["status"]),
+            models.Index(name="booking_status_idx", fields=["status"]),
+            models.Index(name="booking_row_col_idx", fields=["row", "column"]),
         ]
 
     def get_seat_number(self):
-        return f"{self.grp_row_head}{self.seat_number}"
+        return f"{self.row}{self.seat_number}"
 
     @transition(
+        field=status,
         source=BookingStatus.ERROR,
         target=BookingStatus.AVAILABLE,
     )
@@ -161,24 +189,36 @@ class Booking(models.Model):
         pass
 
     @transition(
+        field=status,
         source=BookingStatus.AVAILABLE,
         target=BookingStatus.IN_PROGRESS,
         on_error=BookingStatus.ERROR,
     )
-    def initiate_booking(self):
+    def initiate_booking(self, user):
         # if last seat payment in progress, change property slot's value to True
         pass
 
     @transition(
+        field=status,
         source=BookingStatus.IN_PROGRESS,
-        target=[BookingStatus.PAYMENT_DONE, BookingStatus.PAYMENT_FAILED],
+        target=BookingStatus.PAYMENT_DONE,
         on_error=BookingStatus.ERROR,
     )
-    def payment_process(self):
+    def payment_done(self):
+        pass
+
+    @transition(
+        field=status,
+        source=BookingStatus.IN_PROGRESS,
+        target=BookingStatus.PAYMENT_FAILED,
+        on_error=BookingStatus.ERROR,
+    )
+    def payment_failed(self):
         # if last payment fails, change property slot's value to False
         pass
 
     @transition(
+        field=status,
         source=BookingStatus.PAYMENT_DONE,
         target=BookingStatus.BOOKED,
         on_error=BookingStatus.ERROR,
