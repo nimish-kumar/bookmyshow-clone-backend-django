@@ -53,4 +53,3 @@ class States(models.IntegerChoices):
     LADAKH = 34, _("Ladakh")
     LAKSHADWEEP = 35, _("Lakshadweep")
     PUDUCHERRY = 36, _("Puducherry")
-

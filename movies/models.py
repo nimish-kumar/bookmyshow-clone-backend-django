@@ -4,6 +4,7 @@ from django.db import models
 from django_fsm import FSMIntegerField, transition
 
 from .constants import BookingStatus
+from .utils import get_layout_details
 
 User = get_user_model()
 
@@ -27,7 +28,6 @@ class TrailerUrl(models.Model):
         ordering = ["-id"]
 
 
-# Create your models here.
 class Movie(models.Model):
     cast = models.ManyToManyField("meta.Artist", related_name="cast_movies")
     crew = models.ManyToManyField("meta.Artist", related_name="crew_movies")
@@ -63,7 +63,7 @@ class Theatre(models.Model):
     )
     details = models.TextField()
     facilities = models.ManyToManyField(
-        "meta.Facility", related_name="faicility_theatres"
+        "meta.Facility", related_name="facility_theatres"
     )
     coordinates = models.CharField(max_length=30, null=True, blank=True)
     location_link = models.URLField(null=True, blank=True)
@@ -102,8 +102,7 @@ class BookingSlot(models.Model):
     screen = models.ForeignKey(
         "Screen", on_delete=models.CASCADE, related_name="screen_slots"
     )
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
+    screening_datetime = models.DateTimeField()
     lang = models.ForeignKey(
         "meta.Language",
         on_delete=models.CASCADE,
@@ -116,21 +115,39 @@ class BookingSlot(models.Model):
     )
     layout = models.TextField()
 
-    def create_slot_groups(self):
-        pass
+    def save(self):
+        layout_grps = get_layout_details(layout=self.layout)["grp_details"]
+        if self.id:
+            # delete existing slot grps
+            SlotGroup.objects.filter(slot=self.id).delete()
+        slot_id = self.save()
+        object_grps = []
+        for grp in layout_grps:
+            object_grps.append(
+                SlotGroup(
+                    name=grp["grp_name"],
+                    grp_code=grp["grp_code"],
+                    cost=grp["cost"],
+                    currency=grp["currency"],
+                    slot=slot_id,
+                )
+            )
+
+        SlotGroup.objects.bulk_create(object_grps)
+        return self
 
 
 class SlotGroup(models.Model):
     name = models.CharField(max_length=10)
     grp_code = models.CharField(max_length=2)
-    start_rowhead = models.CharField(max_length=3)
-    end_rowhead = models.CharField(max_length=3)
     cost = models.PositiveSmallIntegerField()
     slot = models.ForeignKey(
         "BookingSlot",
         on_delete=models.CASCADE,
         related_name="slot_booking",
     )
+    currency = models.CharField(max_length=3)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-id"]
@@ -141,7 +158,7 @@ class SlotGroup(models.Model):
 class Booking(models.Model):
     slot_grp = models.ForeignKey(
         "SlotGroup",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="slot_grp",
         verbose_name="Theatre group",
     )
@@ -150,7 +167,11 @@ class Booking(models.Model):
         on_delete=models.CASCADE,
         related_name="user_bookings",
     )
-    seat_number = models.SmallIntegerField(validators=[MinValueValidator(0)])
+    seat_number = models.SmallIntegerField(
+        validators=[
+            MinValueValidator(0),
+        ]
+    )
     status = FSMIntegerField(
         choices=BookingStatus.choices,
         default=BookingStatus.AVAILABLE,
@@ -194,8 +215,9 @@ class Booking(models.Model):
         target=BookingStatus.IN_PROGRESS,
         on_error=BookingStatus.ERROR,
     )
-    def initiate_booking(self, user):
+    def initiate_booking(self):
         # if last seat payment in progress, change property slot's value to True
+        print(f"Status {self.status} changing to 'IN PROGRESS'")
         pass
 
     @transition(

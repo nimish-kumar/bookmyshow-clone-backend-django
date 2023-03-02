@@ -1,13 +1,16 @@
 import graphene
 from graphene_django import DjangoObjectType
 
+from movies.graphql.schema import MoviesQuery
+from meta.graphql.schema import MetaQuery
 
-class Query(graphene.ObjectType):
+
+class Query(MoviesQuery, graphene.ObjectType):
     pass
 
 
-class Mutation(graphene.ObjectType):
-    pass
+# class Mutation(MoviesMutation, graphene.ObjectType):
+#     pass
 
 
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = graphene.Schema(query=Query)
