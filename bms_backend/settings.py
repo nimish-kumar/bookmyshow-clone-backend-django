@@ -45,10 +45,13 @@ INSTALLED_APPS = [
     "graphene_django",
     "core",
     "meta",
-    "movies"
+    "movies",
+    "debug_toolbar",
+    "graphiql_debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -127,6 +130,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "core.User"
 
 GRAPHENE = {
-    "SCHEMA": "core.schema.schema",
+    "SCHEMA": "core.graphql.schema.schema",
     "ATOMIC_MUTATIONS": True,
 }
