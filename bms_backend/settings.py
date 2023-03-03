@@ -133,3 +133,7 @@ GRAPHENE = {
     "SCHEMA": "core.graphql.schema.schema",
     "ATOMIC_MUTATIONS": True,
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
