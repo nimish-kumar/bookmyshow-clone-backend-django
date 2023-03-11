@@ -1,11 +1,16 @@
 import graphene
 
-from movies.graphql.schema import Query as MoviesQuery
-from meta.graphql.schema import MetaQuery
+from movies.graphql.queries import MoviesQuery
+from movies.graphql.mutations import Mutation as MoviesMutation
+from meta.graphql.queries import MetaQuery
 
 
-class Query(MoviesQuery, graphene.ObjectType):
+class Query(MetaQuery, MoviesQuery, graphene.ObjectType):
     pass
 
 
-schema = graphene.Schema(query=Query)
+class Mutation(MoviesMutation, graphene.ObjectType):
+    pass
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

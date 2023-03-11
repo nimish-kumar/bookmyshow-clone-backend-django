@@ -51,20 +51,35 @@ class Tag(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=255)
     state = models.IntegerField(choices=States.choices)
+    icon_url = models.URLField(
+        verbose_name="Icon location",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ["-id"]
         verbose_name_plural = _("Cities")
         indexes = [models.Index(name="cities_idx", fields=["name"])]
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 
 class Artist(models.Model):
     name = models.CharField(max_length=255)
     gender = models.IntegerField(choices=Genders.choices)
-    profile_pic_url = models.URLField(verbose_name=_("Profile pic location"))
+    profile_pic_url = models.URLField(
+        verbose_name=_("Profile pic location"),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 
 class Language(models.Model):
@@ -72,6 +87,13 @@ class Language(models.Model):
 
     UpperField = get_upperfield()
     lang_code = UpperField(
-        max_length=2, unique=True, validators=[RegexValidator("^[A-Z]+$"),]
+        max_length=2,
+        unique=True,
+        validators=[
+            RegexValidator("^[A-Z]+$"),
+        ],
     )
     name = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return f"{self.name}"

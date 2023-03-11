@@ -30,12 +30,28 @@ SECRET_KEY = "django-insecure-vscm0duzn695zsfpy_zmbrzqe13f5u+y@zd@vjwa(--3@al8yr
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+INSTALLED_APPS = []
+MIDDLEWARE = []
+
+
+if DEBUG:
+    INTERNAL_IPS = [
+        "127.0.0.1",
+    ]
+    INSTALLED_APPS += [
+        "debug_toolbar",
+        "graphiql_debug_toolbar",
+    ]
+    MIDDLEWARE += [
+        "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+
 
 ALLOWED_HOSTS = []
 
 
 # Application definition
-INSTALLED_APPS = [
+INSTALLED_APPS += [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -46,12 +62,9 @@ INSTALLED_APPS = [
     "core",
     "meta",
     "movies",
-    "debug_toolbar",
-    "graphiql_debug_toolbar",
 ]
 
-MIDDLEWARE = [
-    "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
+MIDDLEWARE += [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -133,8 +146,3 @@ GRAPHENE = {
     "SCHEMA": "core.graphql.schema.schema",
     "ATOMIC_MUTATIONS": True,
 }
-
-if DEBUG:
-    INTERNAL_IPS = [
-        "127.0.0.1",
-    ]

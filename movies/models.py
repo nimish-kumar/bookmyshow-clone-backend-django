@@ -115,6 +115,10 @@ class BookingSlot(models.Model):
     )
     layout = models.TextField()
 
+    class Meta:
+        ordering = ["-id"]
+        unique_together = ["movie", "screen", "screening_datetime"]
+
     def save(self):
         layout_grps = get_layout_details(layout=self.layout)["grp_details"]
         if self.id:
@@ -166,6 +170,8 @@ class Booking(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="user_bookings",
+        null=True,
+        blank=True,
     )
     seat_number = models.SmallIntegerField(
         validators=[
@@ -184,18 +190,18 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid_amt = models.PositiveSmallIntegerField(null=True, blank=True)
+    transaction_id = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         # Orders by bookings which have been recently added/updated.
         ordering = ["-updated_at", "-id"]
-        unique_together = ["slot_grp", "seat_number"]
+        unique_together = ["slot_grp", "row", "seat_number"]
         indexes = [
             models.Index(
                 name="uniq_booking_idx",
-                fields=["slot_grp", "seat_number"],
+                fields=["slot_grp", "row", "seat_number"],
             ),
             models.Index(name="booking_status_idx", fields=["status"]),
-            models.Index(name="booking_row_col_idx", fields=["row", "column"]),
         ]
 
     def get_seat_number(self):
@@ -217,7 +223,7 @@ class Booking(models.Model):
     )
     def initiate_booking(self):
         # if last seat payment in progress, change property slot's value to True
-        print(f"Status {self.status} changing to 'IN PROGRESS'")
+        print(f"Status changing to 'IN PROGRESS'")
         pass
 
     @transition(
