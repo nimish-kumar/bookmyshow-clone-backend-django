@@ -1,4 +1,5 @@
 import graphene
+from django.db import transaction
 
 from .types import BookingType
 from ..models import Booking, Screen, BookingSlot, SlotGroup
@@ -16,6 +17,7 @@ class InitiateBookingTicket(graphene.Mutation):
 
     ticket_details = graphene.List(BookingType)
 
+    @transaction.atomic
     def mutate(root, info, seats, screen, theatre_id, movie_id, screening_datetime):
         active_user = info.context.user
         screen_obj = Screen.objects.get(
@@ -41,6 +43,11 @@ class InitiateBookingTicket(graphene.Mutation):
             booking.user = active_user
             booking.status = BookingStatus.IN_PROGRESS
         Booking.objects.bulk_update(bookings, ["user", "status"])
+
+        # TODO: Update Booking slot layout
+
+        # TODO: Update remaining seats
+
         return InitiateBookingTicket(
             ticket_details=Booking.objects.filter(
                 pk__in=[booking.id for booking in bookings]
@@ -55,6 +62,7 @@ class ProcessBooking(graphene.Mutation):
     ok = graphene.Boolean()
     ticket_details = graphene.List(BookingType)
 
+    @transaction.atomic
     def mutate(root, info, bookings):
         bookings_obj = Booking.objects.filter(pk__in=list(set(bookings)))
         if bookings_obj.count() != len(list(bookings_obj)):
