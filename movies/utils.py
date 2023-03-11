@@ -1,10 +1,12 @@
 import re
 
+SEAT_REGEX = r"^([0-9]+)([A-Z]+)&([A-Z]+)([0-9]+)\+([0-9]+)$"
 
-def get_seat_details(seat: str):
+
+def test_seat_details(seat: str):
     # {STATUS_CODE}{GRP_CODE}{&}{ROW}{COL}+SEAT_NO
 
-    seat_details = re.search("^([0-9]+)([A-Z]+)&([A-Z]+)([0-9]+)\+([0-9]+)$", seat)
+    seat_details = re.search(SEAT_REGEX, seat)
     if seat_details:
         seat_status, seat_grp, row, col, seat_num = seat_details.groups()
         return {
@@ -14,7 +16,17 @@ def get_seat_details(seat: str):
             "col": col,
             "seat_num": int(seat_num),
         }
-    raise ValueError(f"Seat {seat} regex pattern matching failed")
+    return None
+
+
+def create_seat(status_code, grp_code, row, col, seat_num):
+    return f"{status_code}{grp_code}&{row}{col}+{seat_num}"
+
+
+def get_seat_details(seat: str):
+    if test_seat_details(seat) is None:
+        raise ValueError(f"Seat {seat} regex pattern matching failed")
+    return test_seat_details(seat)
 
 
 def get_grp_details(grp: str):
