@@ -15,6 +15,9 @@ class MovieFormat(models.Model):
     class Meta:
         ordering = ["-id"]
 
+    def __str__(self) -> str:
+        return f"{self.format}"
+
 
 class TrailerUrl(models.Model):
     movie = models.ForeignKey(
@@ -47,6 +50,12 @@ class Movie(models.Model):
         related_name="subtitle_lang_movies",
     )
 
+    class Meta:
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 
 class Theatre(models.Model):
     name = models.CharField(max_length=255)
@@ -70,6 +79,9 @@ class Theatre(models.Model):
 
     class Meta:
         ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 
 class Screen(models.Model):
@@ -117,7 +129,11 @@ class BookingSlot(models.Model):
 
     class Meta:
         ordering = ["-id"]
-        unique_together = ["movie", "screen", "screening_datetime"]
+        unique_together = [
+            "movie",
+            "screen",
+            "screening_datetime",
+        ]
 
     def save(self):
         layout_grps = get_layout_details(layout=self.layout)["grp_details"]
@@ -157,6 +173,7 @@ class SlotGroup(models.Model):
         ordering = ["-id"]
         indexes = [models.Index(name="slot_grp_idx", fields=["grp_code", "slot"])]
         unique_together = ["grp_code", "slot"]
+
 
 
 class Booking(models.Model):
@@ -204,52 +221,5 @@ class Booking(models.Model):
             models.Index(name="booking_status_idx", fields=["status"]),
         ]
 
-    def get_seat_number(self):
+    def __str__(self) -> str:
         return f"{self.row}{self.seat_number}"
-
-    @transition(
-        field=status,
-        source=BookingStatus.ERROR,
-        target=BookingStatus.AVAILABLE,
-    )
-    def fallback(self):
-        pass
-
-    @transition(
-        field=status,
-        source=BookingStatus.AVAILABLE,
-        target=BookingStatus.IN_PROGRESS,
-        on_error=BookingStatus.ERROR,
-    )
-    def initiate_booking(self):
-        # if last seat payment in progress, change property slot's value to True
-        print(f"Status changing to 'IN PROGRESS'")
-        pass
-
-    @transition(
-        field=status,
-        source=BookingStatus.IN_PROGRESS,
-        target=BookingStatus.PAYMENT_DONE,
-        on_error=BookingStatus.ERROR,
-    )
-    def payment_done(self):
-        pass
-
-    @transition(
-        field=status,
-        source=BookingStatus.IN_PROGRESS,
-        target=BookingStatus.PAYMENT_FAILED,
-        on_error=BookingStatus.ERROR,
-    )
-    def payment_failed(self):
-        # if last payment fails, change property slot's value to False
-        pass
-
-    @transition(
-        field=status,
-        source=BookingStatus.PAYMENT_DONE,
-        target=BookingStatus.BOOKED,
-        on_error=BookingStatus.ERROR,
-    )
-    def on_payment_completion(self):
-        pass
