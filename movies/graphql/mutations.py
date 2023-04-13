@@ -22,7 +22,7 @@ class InitiateBookingTicket(graphene.Mutation):
         active_user = info.context.user
         seats_set = list(set(seats))
         if seats.count() != seats_set.count():
-            raise ValueError("Repeate number of seats entered")
+            raise ValueError("Repeated number of seats entered")
         screen_obj = Screen.objects.get(
             screen_id=screen,
             theatre=theatre_id,
