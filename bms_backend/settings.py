@@ -34,17 +34,17 @@ INSTALLED_APPS = []
 MIDDLEWARE = []
 
 
-if DEBUG:
-    INTERNAL_IPS = [
-        "127.0.0.1",
-    ]
-    INSTALLED_APPS += [
-        "debug_toolbar",
-        "graphiql_debug_toolbar",
-    ]
-    MIDDLEWARE += [
-        "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
-    ]
+# if DEBUG:
+#     INTERNAL_IPS = [
+#         "127.0.0.1",
+#     ]
+#     INSTALLED_APPS += [
+#         "debug_toolbar",
+#         "graphiql_debug_toolbar",
+#     ]
+#     MIDDLEWARE += [
+#         "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
+#     ]
 
 
 ALLOWED_HOSTS = []
@@ -145,4 +145,12 @@ AUTH_USER_MODEL = "core.User"
 GRAPHENE = {
     "SCHEMA": "core.graphql.schema.schema",
     "ATOMIC_MUTATIONS": True,
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
 }
+
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
