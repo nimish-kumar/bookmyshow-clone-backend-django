@@ -15,13 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
 from .settings import DEBUG
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("gql/", GraphQLView.as_view(graphiql=True)),
+    # TODO: Remove xrf_exempt for production
+    path("gql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
 
 if DEBUG:
