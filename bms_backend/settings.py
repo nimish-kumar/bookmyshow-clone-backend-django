@@ -47,7 +47,7 @@ MIDDLEWARE = []
 #         "graphiql_debug_toolbar.middleware.DebugToolbarMiddleware",
 #     ]
 
-
+# TODO: Remove * from ALLOWED_HOSTS for production
 ALLOWED_HOSTS = ["*"]
 
 
