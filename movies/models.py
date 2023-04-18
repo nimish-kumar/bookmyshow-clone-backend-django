@@ -39,7 +39,7 @@ class Movie(models.Model):
     genre = models.ManyToManyField("meta.Genre", related_name="genre_movies")
     release_date = models.DateField()
     format = models.ManyToManyField("MovieFormat", related_name="format_movies")
-    descriptiom = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     movie_length = models.DurationField(help_text="Movie length in hours")
     lang = models.ManyToManyField(
         "meta.Language",
@@ -127,6 +127,13 @@ class BookingSlot(models.Model):
         null=True,
         blank=True,
     )
+    format = models.ForeignKey(
+        "MovieFormat",
+        on_delete=models.CASCADE,
+        related_name="format_slot",
+        null=True,
+        blank=True,
+    )
     layout = models.TextField()
 
     class Meta:
@@ -152,7 +159,6 @@ class BookingSlot(models.Model):
                     name=grp["grp_name"],
                     grp_code=grp["grp_code"],
                     cost=grp["cost"],
-                    currency=grp["currency"],
                     slot=self,
                 )
             )
@@ -164,7 +170,9 @@ class BookingSlot(models.Model):
                 if test_seat_details(seat):
                     seat_details = get_seat_details(seat)
                     grp_code = seat_details["seat_grp"]
-                    slot_grp = SlotGroup.objects.get(slot=self, grp_code=grp_code)
+                    slot_grp = SlotGroup.objects.get(
+                        slot=self, grp_code=grp_code
+                    )
                     bookings.append(
                         Booking(
                             slot_grp=slot_grp,
@@ -184,21 +192,22 @@ class SlotGroup(models.Model):
     slot = models.ForeignKey(
         "BookingSlot",
         on_delete=models.CASCADE,
-        related_name="slot_booking",
+        related_name="slotgrp_booking",
     )
-    currency = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-id"]
-        indexes = [models.Index(name="slot_grp_idx", fields=["grp_code", "slot"])]
+        indexes = [
+            models.Index(name="slot_grp_idx", fields=["grp_code", "slot"])
+        ]
         unique_together = ["grp_code", "slot"]
 
 
 class Booking(models.Model):
     slot_grp = models.ForeignKey(
         "SlotGroup",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="slot_grp",
         verbose_name="Theatre group",
     )
