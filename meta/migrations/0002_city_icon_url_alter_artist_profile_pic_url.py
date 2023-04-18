@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="city",
             name="icon_url",
-            field=models.URLField(blank=True, null=True, verbose_name="Icon location"),
+            field=models.URLField(
+                blank=True, null=True, verbose_name="Icon location"
+            ),
         ),
         migrations.AlterField(
             model_name="artist",

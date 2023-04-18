@@ -31,7 +31,9 @@ def get_seat_details(seat: str):
 
 def get_grp_details(grp: str):
     # {GRP_NAME}:{GRP_CODE}:{COST}:{GRP_ORDER}:{CURRENCY}:N
-    grp_details = re.search("^([A-Z]+):([A-Z]+):([\d]+):([A-Z]+):([\d]+):N", grp)
+    grp_details = re.search(
+        "^([A-Z]+):([A-Z]+):([\d]+):([A-Z]+):([\d]+):N", grp
+    )
     if grp_details:
         grp_name, grp_code, cost, grp_order, currency = grp_details.groups()
         return {

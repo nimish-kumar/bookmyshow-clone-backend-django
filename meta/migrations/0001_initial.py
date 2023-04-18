@@ -161,7 +161,9 @@ class Migration(migrations.Migration):
                     core.fields.UpperField(
                         max_length=2,
                         unique=True,
-                        validators=[django.core.validators.RegexValidator("^[A-Z]+$")],
+                        validators=[
+                            django.core.validators.RegexValidator("^[A-Z]+$")
+                        ],
                     ),
                 ),
                 ("name", models.CharField(max_length=255)),

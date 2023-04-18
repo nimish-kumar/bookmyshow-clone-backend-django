@@ -47,7 +47,8 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name="booking",
             index=models.Index(
-                fields=["slot_grp", "row", "seat_number"], name="uniq_booking_idx"
+                fields=["slot_grp", "row", "seat_number"],
+                name="uniq_booking_idx",
             ),
         ),
     ]

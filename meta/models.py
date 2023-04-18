@@ -23,7 +23,9 @@ class Genre(models.Model):
 # Create your models here.
 class Facility(models.Model):
     name = models.CharField(max_length=255)
-    priority = models.IntegerField(choices=Priorities.choices, default=Priorities.LO)
+    priority = models.IntegerField(
+        choices=Priorities.choices, default=Priorities.LO
+    )
 
     class Meta:
         ordering = ["-id"]

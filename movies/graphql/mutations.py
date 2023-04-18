@@ -18,7 +18,9 @@ class InitiateBookingTicket(graphene.Mutation):
     ticket_details = graphene.List(BookingType)
 
     @transaction.atomic
-    def mutate(root, info, seats, screen, theatre_id, movie_id, screening_datetime):
+    def mutate(
+        root, info, seats, screen, theatre_id, movie_id, screening_datetime
+    ):
         active_user = info.context.user
         seats_set = list(set(seats))
         if seats.count() != seats_set.count():
@@ -47,9 +49,13 @@ class InitiateBookingTicket(graphene.Mutation):
             row = seat_info["row"]
             col = seat_info["col"]
             seat_num = int(seat_info["seat_num"])
-            slot_grp = SlotGroup.objects.get(grp_code=seat_grp, slot=booking_slot)
+            slot_grp = SlotGroup.objects.get(
+                grp_code=seat_grp, slot=booking_slot
+            )
             bookings.append(
-                Booking.objects.get(slot_grp=slot_grp, row=row, seat_number=seat_num)
+                Booking.objects.get(
+                    slot_grp=slot_grp, row=row, seat_number=seat_num
+                )
             )
             updated_seat = create_seat(
                 status_code=SeatStatus.SOLD,

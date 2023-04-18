@@ -144,7 +144,10 @@ class Migration(migrations.Migration):
                 ("address", models.TextField()),
                 ("area_name", models.CharField(max_length=30)),
                 ("details", models.TextField()),
-                ("coordinates", models.CharField(blank=True, max_length=30, null=True)),
+                (
+                    "coordinates",
+                    models.CharField(blank=True, max_length=30, null=True),
+                ),
                 ("location_link", models.URLField(blank=True, null=True)),
                 (
                     "city",
@@ -231,7 +234,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="movie",
             name="genre",
-            field=models.ManyToManyField(related_name="genre_movies", to="meta.genre"),
+            field=models.ManyToManyField(
+                related_name="genre_movies", to="meta.genre"
+            ),
         ),
         migrations.AddField(
             model_name="movie",
@@ -304,14 +309,19 @@ class Migration(migrations.Migration):
                             (5, "Error"),
                         ],
                         default=0,
-                        validators=[django.core.validators.MinValueValidator(0)],
+                        validators=[
+                            django.core.validators.MinValueValidator(0)
+                        ],
                     ),
                 ),
                 ("row", models.CharField(max_length=3)),
                 ("column", models.CharField(max_length=3)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("paid_amt", models.PositiveSmallIntegerField(blank=True, null=True)),
+                (
+                    "paid_amt",
+                    models.PositiveSmallIntegerField(blank=True, null=True),
+                ),
                 (
                     "slot_grp",
                     models.ForeignKey(
@@ -336,7 +346,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="slotgroup",
-            index=models.Index(fields=["grp_code", "slot"], name="slot_grp_idx"),
+            index=models.Index(
+                fields=["grp_code", "slot"], name="slot_grp_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
             name="slotgroup",
@@ -344,7 +356,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="screen",
-            index=models.Index(fields=["screen_id", "theatre"], name="screen_idx"),
+            index=models.Index(
+                fields=["screen_id", "theatre"], name="screen_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
             name="screen",
@@ -352,7 +366,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="booking",
-            index=models.Index(fields=["row", "seat_number"], name="uniq_booking_idx"),
+            index=models.Index(
+                fields=["row", "seat_number"], name="uniq_booking_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="booking",

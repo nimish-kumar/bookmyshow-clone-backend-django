@@ -28,7 +28,9 @@ class User(AbstractUser):
     class Meta:
         indexes = [
             models.Index(name="usr_email_idx", fields=["email"]),
-            models.Index(name="usr_names_idx", fields=["first_name", "last_name"]),
+            models.Index(
+                name="usr_names_idx", fields=["first_name", "last_name"]
+            ),
         ]
 
     def __str__(self):
