@@ -1,5 +1,6 @@
+from django.db.models import Max, Min
 from graphene_django import DjangoObjectType
-
+from graphene import Int, List, ObjectType, Field
 from ..models import (
     Booking,
     BookingSlot,
@@ -10,6 +11,9 @@ from ..models import (
     Theatre,
     TrailerUrl,
 )
+
+from meta.graphql.types import LanguageType
+
 
 class TrailerUrlType(DjangoObjectType):
     class Meta:
@@ -33,6 +37,26 @@ class BookingSlotType(DjangoObjectType):
     class Meta:
         model = BookingSlot
         fields = "__all__"
+
+    max_cost = Int()
+    min_cost = Int()
+
+    @staticmethod
+    def resolve_max_cost(root, info):
+        slotgrp_bookings = SlotGroup.objects.filter(
+            slot=root.id, slot__is_fully_booked=False
+        )
+        max_cost = slotgrp_bookings.aggregate(Max("cost"))
+
+        return max_cost["cost__max"]
+
+    @staticmethod
+    def resolve_min_cost(root, info):
+        slotgrp_bookings = SlotGroup.objects.filter(
+            slot=root.id, slot__is_fully_booked=False
+        )
+        min_cost = slotgrp_bookings.aggregate(Min("cost"))
+        return min_cost["cost__min"]
 
 
 class MovieFormatType(DjangoObjectType):
@@ -58,3 +82,12 @@ class TheatreType(DjangoObjectType):
         model = Theatre
         fields = "__all__"
 
+
+class LanguageFormatType(ObjectType):
+    lang = Field(LanguageType)
+    formats = List(MovieFormatType)
+
+
+class MovieDetailsType(ObjectType):
+    movie = Field(MovieType)
+    langs = List(LanguageFormatType)
