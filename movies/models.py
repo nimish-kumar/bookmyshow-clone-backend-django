@@ -75,7 +75,6 @@ class Theatre(models.Model):
     city = models.ForeignKey(
         "meta.City", on_delete=models.CASCADE, related_name="city_theatres"
     )
-    details = models.TextField()
     facilities = models.ManyToManyField(
         "meta.Facility", related_name="facility_theatres"
     )
