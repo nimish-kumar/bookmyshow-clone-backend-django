@@ -42,8 +42,8 @@ class Facility(models.Model):
         ]
         verbose_name_plural = "Facilities"
 
-
-ordering = ["-id"]
+    def __str__(self):
+        return f"{self.name}"
 
 
 class Tag(models.Model):
