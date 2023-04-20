@@ -32,8 +32,12 @@ class TrailerUrl(models.Model):
 
 
 class Movie(models.Model):
-    cast = models.ManyToManyField("meta.Artist", related_name="cast_movies")
-    crew = models.ManyToManyField("meta.Artist", related_name="crew_movies")
+    cast = models.ManyToManyField(
+        "meta.Artist", related_name="cast_movies", blank=True
+    )
+    crew = models.ManyToManyField(
+        "meta.Artist", related_name="crew_movies", blank=True
+    )
     name = models.CharField(max_length=255)
     is_released = models.BooleanField(default=False)
     genre = models.ManyToManyField("meta.Genre", related_name="genre_movies")
@@ -48,6 +52,7 @@ class Movie(models.Model):
     subtitles_lang = models.ManyToManyField(
         "meta.Language",
         related_name="subtitle_lang_movies",
+        blank=True,
     )
 
     class Meta:
