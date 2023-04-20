@@ -110,7 +110,7 @@ class Screen(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.screen_id}"
+        return f"{self.theatre.name} --> {self.screen_id}"
 
 
 class BookingSlot(models.Model):
