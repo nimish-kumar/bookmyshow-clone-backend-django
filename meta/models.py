@@ -19,6 +19,9 @@ class Genre(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 
 # Create your models here.
 class Facility(models.Model):
