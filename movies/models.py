@@ -95,6 +95,7 @@ class Screen(models.Model):
         on_delete=models.CASCADE,
         related_name="theatre_screen",
     )
+    layout = models.TextField()
 
     class Meta:
         ordering = ["-id"]
@@ -141,7 +142,6 @@ class BookingSlot(models.Model):
         null=True,
         blank=True,
     )
-    layout = models.TextField()
 
     class Meta:
         ordering = ["-id"]
@@ -152,7 +152,7 @@ class BookingSlot(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        layout = get_layout_details(layout=self.layout)
+        layout = get_layout_details(layout=self.screen.layout)
         layout_grps = layout["grp_details"]
         rows = layout["seating_layout"].split("|")
         if self.id:
