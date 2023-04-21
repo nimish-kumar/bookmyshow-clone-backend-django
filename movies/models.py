@@ -89,7 +89,7 @@ class Theatre(models.Model):
 
 
 class Screen(models.Model):
-    screen_id = models.CharField(max_length=5, unique=True)
+    screen_id = models.CharField(max_length=5)
     theatre = models.ForeignKey(
         "Theatre",
         on_delete=models.CASCADE,
