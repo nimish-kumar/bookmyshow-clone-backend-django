@@ -5,6 +5,7 @@ from .types import BookingSlotType, MovieDetailsType
 from ..models import BookingSlot, Movie, MovieFormat
 
 from django.utils import timezone
+from datetime import timedelta
 
 
 class MoviesQuery(graphene.ObjectType):
@@ -33,9 +34,10 @@ class MoviesQuery(graphene.ObjectType):
             description="Movie ID",
             required=True,
         ),
-        datetime=graphene.Argument(
-            graphene.DateTime,
-            description="Bookings date",
+        format=graphene.Argument(
+            graphene.ID,
+            description="Movie Format ID",
+            required=True,
         ),
     )
 
@@ -50,6 +52,7 @@ class MoviesQuery(graphene.ObjectType):
                 screen__theatre__city_id=city,
                 is_fully_booked=False,
                 screening_datetime__gte=timezone.now(),
+                screening_datetime__lte=timezone.now() + timedelta(days=7),
             )
             .values("movie", "lang", "format")
             .distinct()
@@ -98,19 +101,18 @@ class MoviesQuery(graphene.ObjectType):
         return movie_details_list
 
     def resolve_list_movie_slots_by_city_date_lang(
-        root,
-        info,
-        city,
-        language,
-        movie,
-        datetime=timezone.now(),
+        root, info, city, language, movie, format
     ):
         filters = Q()
         filter_by_city = Q(screen__theatre__city_id=city)
         filter_by_movie = Q(movie_id=movie)
-        filter_by_datetime = Q(screening_datetime__gte=datetime)
+        filter_by_datetime = Q(screening_datetime__gte=timezone.now()) & Q(
+            screening_datetime__lte=timezone.now() + timedelta(days=7)
+        )
         filter_by_language = Q(lang_id=language)
         filter_by_availability = Q(is_fully_booked=False)
+        filter_by_format = Q(format_id=format)
+
         filters = (
             filters
             & filter_by_city
@@ -118,6 +120,7 @@ class MoviesQuery(graphene.ObjectType):
             & filter_by_datetime
             & filter_by_language
             & filter_by_availability
+            & filter_by_format
         )
         return (
             BookingSlot.objects.select_related("movie", "screen__theatre__city")
