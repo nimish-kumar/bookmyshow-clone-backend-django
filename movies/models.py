@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django_fsm import FSMIntegerField, transition
+from django_fsm import FSMIntegerField
 
 from .constants import BookingStatus
 from .utils import get_layout_details, test_seat_details, get_seat_details
@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class MovieFormat(models.Model):
-    format = models.CharField(max_length=5)
+    format = models.CharField(max_length=8)
 
     class Meta:
         ordering = ["-id"]
