@@ -1,4 +1,5 @@
 import graphene
+from graphql_jwt.decorators import login_required
 from django.db.models import Q
 from meta.models import Language
 from .types import BookingSlotType, MovieDetailsType
@@ -25,7 +26,7 @@ class MoviesQuery(graphene.ObjectType):
             required=True,
         ),
         language=graphene.Argument(
-            graphene.ID,
+            graphene.String,
             description="Movie language",
             required=True,
         ),
@@ -35,12 +36,13 @@ class MoviesQuery(graphene.ObjectType):
             required=True,
         ),
         format=graphene.Argument(
-            graphene.ID,
+            graphene.String,
             description="Movie Format ID",
             required=True,
         ),
     )
 
+    @login_required
     def resolve_list_movie_lang_by_city(
         root,
         info,
@@ -100,6 +102,7 @@ class MoviesQuery(graphene.ObjectType):
 
         return movie_details_list
 
+    @login_required
     def resolve_list_movie_slots_by_city_date_lang(
         root, info, city, language, movie, format
     ):
@@ -109,9 +112,9 @@ class MoviesQuery(graphene.ObjectType):
         filter_by_datetime = Q(screening_datetime__gte=timezone.now()) & Q(
             screening_datetime__lte=timezone.now() + timedelta(days=7)
         )
-        filter_by_language = Q(lang_id=language)
+        filter_by_language = Q(lang__lang_code=language)
         filter_by_availability = Q(is_fully_booked=False)
-        filter_by_format = Q(format_id=format)
+        filter_by_format = Q(format__format=format)
 
         filters = (
             filters
