@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class MovieFormat(models.Model):
-    format = models.CharField(max_length=8)
+    format = models.CharField(max_length=8, unique=True)
 
     class Meta:
         ordering = ["-id"]
