@@ -56,6 +56,7 @@ class MoviesQuery(graphene.ObjectType):
                 screening_datetime__gte=timezone.now(),
                 screening_datetime__lte=timezone.now() + timedelta(days=7),
             )
+            .order_by()
             .values("movie", "lang", "format")
             .distinct()
         )
