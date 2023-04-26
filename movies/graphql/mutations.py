@@ -37,12 +37,12 @@ class InitiateBookingTicket(graphene.Mutation):
         )
         bookings = []
         # Update Booking slot layout
-        updated_layout = booking_slot.layout
+        updated_layout = booking_slot.screen.layout
 
         for seat in seats:
             if seat not in updated_layout:
                 raise ValueError("Seat not present in the layout")
-            seat_info = get_seat_details(seat)
+            seat_info = get_seat_details(seat, re_status=False)
             seat_status = seat_info["seat_status"]
             if int(seat_status) != SeatStatus.AVAILABLE:
                 raise ValueError("Seat status is not set as available")
@@ -124,7 +124,7 @@ class DirectBookingTicket(graphene.Mutation):
     def mutate(root, info, seats, slot_id):
         active_user = info.context.user
         seats_set = list(set(seats))
-        if seats.count() != seats_set.count():
+        if len(seats) != len(seats_set):
             raise ValueError("Repeated number of seats entered")
         try:
             booking_slot = BookingSlot.objects.get(pk=slot_id)
@@ -132,15 +132,12 @@ class DirectBookingTicket(graphene.Mutation):
             raise ValueError("Wrong slot ID")
         bookings = []
         # Update Booking slot layout
-        updated_layout = booking_slot.layout
+        updated_layout = booking_slot.screen.layout
 
         for seat in seats:
             if seat not in updated_layout:
                 raise ValueError("Seat not present in the layout")
-            seat_info = get_seat_details(seat)
-            seat_status = seat_info["seat_status"]
-            if int(seat_status) != SeatStatus.AVAILABLE:
-                raise ValueError("Seat status is not set as available")
+            seat_info = get_seat_details(seat, re_status=False)
             seat_grp = seat_info["seat_grp"]
             row = seat_info["row"]
             col = seat_info["col"]
