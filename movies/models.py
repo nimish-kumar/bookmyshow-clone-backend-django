@@ -142,6 +142,7 @@ class BookingSlot(models.Model):
         null=True,
         blank=True,
     )
+    current_layout = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ["-id"]
@@ -158,6 +159,8 @@ class BookingSlot(models.Model):
         if self.id:
             # delete existing slot grps
             SlotGroup.objects.filter(slot=self.id).delete()
+        else:
+            self.current_layout = self.screen.layout
         super(BookingSlot, self).save(*args, **kwargs)
         object_grps = []
         for grp in layout_grps:
