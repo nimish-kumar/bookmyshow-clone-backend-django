@@ -48,7 +48,7 @@ class MoviesQuery(graphene.ObjectType):
         info,
         city,
     ):
-        slots = list(
+        movie_langs = list(
             BookingSlot.objects.select_related("screen__theatre__city")
             .filter(
                 screen__theatre__city_id=city,
@@ -57,41 +57,35 @@ class MoviesQuery(graphene.ObjectType):
                 screening_datetime__lte=timezone.now() + timedelta(days=7),
             )
             .order_by()
-            .values("movie", "lang", "format")
+            .values_list("movie", "lang", "format")
             .distinct()
         )
-        movie_ids = []
-        movie_details_list = []
-        for i in range(len(slots)):
-            slot = slots[i]
-            if slot["movie"] not in movie_ids:
-                movies_list = list(
-                    filter(lambda s: s["movie"] == slot["movie"], slots)
-                )
+        movie_details_dict = dict()
+        for movie_lang in movie_langs:
+            movie_id, lang_id, format_id = movie_lang
+            if movie_id not in movie_details_dict.keys():
+                movie_details_dict[movie_id] = {lang_id: set([format_id])}
+            else:
+                movie_details_dict[movie_id][lang_id].add(format_id)
 
-                movie_details_list.append(
+        movies_details_list = []
+        for movie_id in movie_details_dict.keys():
+            movies_details_list.append({"movie": movie_id, "langs": list()})
+
+        for movie in movies_details_list:
+            [
+                movie["langs"].append(
                     {
-                        "movie": slot["movie"],
-                        "langs": [
-                            {
-                                "lang": movie_detail["lang"],
-                                "formats": [
-                                    format["format"]
-                                    for format in list(
-                                        filter(
-                                            lambda x: x["lang"]
-                                            == movie_detail["lang"],
-                                            movies_list,
-                                        )
-                                    )
-                                ],
-                            }
-                            for movie_detail in movies_list
-                        ],
+                        "lang": lang_id,
+                        "formats": list(
+                            movie_details_dict[movie["movie"]][lang_id]
+                        ),
                     }
                 )
-                movie_ids.append(slot["movie"])
-        for movie_detail in movie_details_list:
+                for lang_id in movie_details_dict[movie["movie"]].keys()
+            ]
+
+        for movie_detail in movies_details_list:
             movie_detail["movie"] = Movie.objects.get(pk=movie_detail["movie"])
             for lang_detail in movie_detail["langs"]:
                 lang_detail["lang"] = Language.objects.get(
@@ -101,7 +95,7 @@ class MoviesQuery(graphene.ObjectType):
                     id__in=lang_detail["formats"]
                 )
 
-        return movie_details_list
+        return movies_details_list
 
     @login_required
     def resolve_list_movie_slots_by_city_date_lang(
