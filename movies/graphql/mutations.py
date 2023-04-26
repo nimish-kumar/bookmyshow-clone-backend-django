@@ -132,12 +132,12 @@ class DirectBookingTicket(graphene.Mutation):
             raise ValueError("Wrong slot ID")
         bookings = []
         # Update Booking slot layout
-        updated_layout = booking_slot.screen.layout
+        updated_layout = booking_slot.current_layout
 
         for seat in seats:
             if seat not in updated_layout:
                 raise ValueError("Seat not present in the layout")
-            seat_info = get_seat_details(seat, re_status=False)
+            seat_info = get_seat_details(seat)
             seat_grp = seat_info["seat_grp"]
             row = seat_info["row"]
             col = seat_info["col"]
@@ -165,6 +165,8 @@ class DirectBookingTicket(graphene.Mutation):
             )
 
             updated_layout = updated_layout.replace(seat, updated_seat, 1)
+            booking_slot.current_layout = updated_layout
+            booking_slot.save()
 
         for booking in bookings:
             booking.user = active_user
