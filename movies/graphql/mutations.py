@@ -111,6 +111,84 @@ class ProcessBooking(graphene.Mutation):
         )
 
 
+class DirectBookingTicket(graphene.Mutation):
+    class Arguments:
+        seats = graphene.List(graphene.String)
+        slot_id = graphene.ID(required=True)
+
+    ticket_details = graphene.List(BookingType)
+
+    @transaction.atomic
+    def mutate(root, info, seats, slot_id):
+        active_user = info.context.user
+        seats_set = list(set(seats))
+        if seats.count() != seats_set.count():
+            raise ValueError("Repeated number of seats entered")
+        try:
+            booking_slot = BookingSlot.objects.get(pk=slot_id)
+        except BookingSlot.DoesNotExist:
+            raise ValueError("Wrong slot ID")
+        bookings = []
+        # Update Booking slot layout
+        updated_layout = booking_slot.layout
+
+        for seat in seats:
+            if seat not in updated_layout:
+                raise ValueError("Seat not present in the layout")
+            seat_info = get_seat_details(seat)
+            seat_status = seat_info["seat_status"]
+            if int(seat_status) != SeatStatus.AVAILABLE:
+                raise ValueError("Seat status is not set as available")
+            seat_grp = seat_info["seat_grp"]
+            row = seat_info["row"]
+            col = seat_info["col"]
+            seat_num = int(seat_info["seat_num"])
+            slot_grp = SlotGroup.objects.get(
+                grp_code=seat_grp, slot=booking_slot
+            )
+            try:
+                bookings.append(
+                    Booking.objects.get(
+                        slot_grp=slot_grp,
+                        row=row,
+                        seat_number=seat_num,
+                        status=BookingStatus.AVAILABLE,
+                    )
+                )
+            except Booking.DoesNotExist:
+                raise ValueError("Request seat is not available for booking")
+            updated_seat = create_seat(
+                status_code=SeatStatus.SOLD,
+                col=col,
+                row=row,
+                grp_code=seat_grp,
+                seat_num=seat_num,
+            )
+
+            updated_layout = updated_layout.replace(seat, updated_seat, 1)
+
+        for booking in bookings:
+            booking.user = active_user
+            booking.status = BookingStatus.BOOKED
+        Booking.objects.bulk_update(bookings, ["user", "status"])
+
+        # Update count of remaining seats
+        slot_grps = list(SlotGroup.objects.filter(slot=booking_slot))
+        if (
+            Booking.objects.filter(
+                slot_grp__in=slot_grps, status=BookingStatus.AVAILABLE
+            ).count()
+            == 0
+        ):
+            booking_slot.is_fully_booked = True
+        return InitiateBookingTicket(
+            ticket_details=Booking.objects.filter(
+                pk__in=[booking.id for booking in bookings]
+            ),
+        )
+
+
 class Mutation(graphene.ObjectType):
     initiate_booking_ticket = InitiateBookingTicket.Field()
     process_booking = ProcessBooking.Field()
+    book_tickets = DirectBookingTicket.Field()
