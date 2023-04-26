@@ -1,5 +1,6 @@
 import graphene
 from django.db import transaction
+from graphql_jwt.decorators import login_required
 
 from .types import BookingType
 from ..models import Booking, Screen, BookingSlot, SlotGroup
@@ -118,6 +119,7 @@ class DirectBookingTicket(graphene.Mutation):
 
     ticket_details = graphene.List(BookingType)
 
+    @login_required
     @transaction.atomic
     def mutate(root, info, seats, slot_id):
         active_user = info.context.user
@@ -189,6 +191,6 @@ class DirectBookingTicket(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
-    initiate_booking_ticket = InitiateBookingTicket.Field()
-    process_booking = ProcessBooking.Field()
+    # initiate_booking_ticket = InitiateBookingTicket.Field()
+    # process_booking = ProcessBooking.Field()
     book_tickets = DirectBookingTicket.Field()
