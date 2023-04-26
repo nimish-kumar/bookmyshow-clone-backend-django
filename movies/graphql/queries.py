@@ -41,6 +41,14 @@ class MoviesQuery(graphene.ObjectType):
             required=True,
         ),
     )
+    get_slot_details = graphene.Field(
+        BookingSlotType,
+        id=graphene.Argument(
+            graphene.ID,
+            description="Slot ID",
+            required=True,
+        ),
+    )
 
     @login_required
     def resolve_list_movie_lang_by_city(
@@ -130,3 +138,7 @@ class MoviesQuery(graphene.ObjectType):
             .filter(filters)
             .all()
         )
+
+    @login_required
+    def resolve_get_slot_details(root, info, id):
+        return BookingSlot.objects.get(pk=id)
