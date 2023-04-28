@@ -243,13 +243,11 @@ class Booking(models.Model):
     row = models.CharField(max_length=3)
     column = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     paid_amt = models.PositiveSmallIntegerField(null=True, blank=True)
-    transaction_id = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
-        # Orders by bookings which have been recently added/updated.
-        ordering = ["-updated_at", "-id"]
+        # Orders by bookings which have been recently added.
+        ordering = ["-created_at", "-id"]
         unique_together = ["slot_grp", "row", "seat_number"]
         indexes = [
             models.Index(
