@@ -4,7 +4,6 @@ from django.db import models
 from django_fsm import FSMIntegerField
 
 from .constants import BookingStatus
-from .utils import get_layout_details, test_seat_details, get_seat_details
 
 User = get_user_model()
 
@@ -152,47 +151,6 @@ class BookingSlot(models.Model):
             "screening_datetime",
         ]
 
-    def save(self, *args, **kwargs):
-        layout = get_layout_details(layout=self.screen.layout)
-        layout_grps = layout["grp_details"]
-        rows = layout["seating_layout"].split("|")
-        if self.id:
-            # delete existing slot grps
-            SlotGroup.objects.filter(slot=self.id).delete()
-        else:
-            self.current_layout = self.screen.layout
-        super(BookingSlot, self).save(*args, **kwargs)
-        object_grps = []
-        for grp in layout_grps:
-            object_grps.append(
-                SlotGroup(
-                    name=grp["grp_name"],
-                    grp_code=grp["grp_code"],
-                    cost=grp["cost"],
-                    slot=self,
-                )
-            )
-        SlotGroup.objects.bulk_create(object_grps)
-        bookings = []
-        for row in rows:
-            seats_arr = row.split(":")
-            for seat in seats_arr:
-                if test_seat_details(seat):
-                    seat_details = get_seat_details(seat)
-                    grp_code = seat_details["seat_grp"]
-                    slot_grp = SlotGroup.objects.get(
-                        slot=self, grp_code=grp_code
-                    )
-                    bookings.append(
-                        Booking(
-                            slot_grp=slot_grp,
-                            seat_number=seat_details["seat_num"],
-                            row=seat_details["row"],
-                            column=seat_details["col"],
-                        )
-                    )
-        Booking.objects.bulk_create(bookings)
-        return super().save()
 
 
 class SlotGroup(models.Model):
