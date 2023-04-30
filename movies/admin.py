@@ -9,9 +9,62 @@ from .models import (
     Theatre,
     TrailerUrl,
 )
+from .utils import get_layout_details, test_seat_details, get_seat_details
 
 admin.site.register(Booking)
-admin.site.register(BookingSlot)
+
+
+@admin.register(BookingSlot)
+class BookingSlotAdmin(admin.ModelAdmin):
+    list_display = (
+        "movie",
+        "is_fully_booked",
+        "screening_datetime",
+    )
+
+    def save_model(self, request, obj, form, change):
+        layout = get_layout_details(layout=obj.screen.layout)
+        layout_grps = layout["grp_details"]
+        rows = layout["seating_layout"].split("|")
+        if obj.id:
+            # delete existing slot grps
+            SlotGroup.objects.filter(slot=obj.id).delete()
+        else:
+            obj.current_layout = obj.screen.layout
+        super().save_model(request, obj, form, change)
+        object_grps = []
+        for grp in layout_grps:
+            object_grps.append(
+                SlotGroup(
+                    name=grp["grp_name"],
+                    grp_code=grp["grp_code"],
+                    cost=grp["cost"],
+                    slot=obj,
+                )
+            )
+        SlotGroup.objects.bulk_create(object_grps)
+        bookings = []
+        for row in rows:
+            seats_arr = row.split(":")
+            for seat in seats_arr:
+                if test_seat_details(seat):
+                    seat_details = get_seat_details(seat)
+                    grp_code = seat_details["seat_grp"]
+                    slot_grp = SlotGroup.objects.get(
+                        slot=obj, grp_code=grp_code
+                    )
+                    bookings.append(
+                        Booking(
+                            slot_grp=slot_grp,
+                            seat_number=seat_details["seat_num"],
+                            row=seat_details["row"],
+                            column=seat_details["col"],
+                        )
+                    )
+        Booking.objects.bulk_create(bookings)
+        super().save_model(request, obj, form, change)
+
+
 admin.site.register(Movie)
 admin.site.register(MovieFormat)
 admin.site.register(Screen)
