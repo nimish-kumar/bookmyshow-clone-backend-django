@@ -53,6 +53,7 @@ class Movie(models.Model):
         related_name="subtitle_lang_movies",
         blank=True,
     )
+    poster_url = models.URLField(null=True, blank=True)
 
     class Meta:
         ordering = ["-id"]
@@ -150,7 +151,6 @@ class BookingSlot(models.Model):
             "screen",
             "screening_datetime",
         ]
-
 
 
 class SlotGroup(models.Model):
