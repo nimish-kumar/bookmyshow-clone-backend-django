@@ -11,6 +11,7 @@ python = "^3.11"
 django = "^4.1.6"
 django-fsm = "^2.8.1"
 graphene-django = "^3.0.0"
+firebase-admin = "^6.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
