@@ -59,6 +59,13 @@ class BookingSlotType(DjangoObjectType):
         return min_cost["cost__min"]
 
 
+class Pagination(ObjectType):
+    count = Int()
+    previous_page = Int()
+    next_page = Int()
+    results = List(Field)
+
+
 class MovieFormatType(DjangoObjectType):
     class Meta:
         model = MovieFormat
@@ -91,3 +98,17 @@ class LanguageFormatType(ObjectType):
 class MovieDetailsType(ObjectType):
     movie = Field(MovieType)
     langs = List(LanguageFormatType)
+
+
+class PaginatedBookingType(ObjectType):
+    prev_page = Int()
+    next_page = Int()
+    count = Int()
+    results = List(BookingType)
+
+
+class PaginatedMoviesListFormats(ObjectType):
+    prev_page = Int()
+    next_page = Int()
+    count = Int()
+    results = List(MovieDetailsType)
