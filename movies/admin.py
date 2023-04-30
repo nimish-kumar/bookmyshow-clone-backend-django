@@ -13,6 +13,7 @@ from .utils import get_layout_details, test_seat_details, get_seat_details
 
 admin.site.register(Booking)
 
+
 @admin.register(BookingSlot)
 class BookingSlotAdmin(admin.ModelAdmin):
     list_display = (
@@ -22,14 +23,14 @@ class BookingSlotAdmin(admin.ModelAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        layout = get_layout_details(layout=self.screen.layout)
+        layout = get_layout_details(layout=obj.screen.layout)
         layout_grps = layout["grp_details"]
         rows = layout["seating_layout"].split("|")
-        if self.id:
+        if obj.id:
             # delete existing slot grps
-            SlotGroup.objects.filter(slot=self.id).delete()
+            SlotGroup.objects.filter(slot=obj.id).delete()
         else:
-            self.current_layout = self.screen.layout
+            obj.current_layout = obj.screen.layout
         super().save_model(request, obj, form, change)
         object_grps = []
         for grp in layout_grps:
@@ -38,7 +39,7 @@ class BookingSlotAdmin(admin.ModelAdmin):
                     name=grp["grp_name"],
                     grp_code=grp["grp_code"],
                     cost=grp["cost"],
-                    slot=self,
+                    slot=obj,
                 )
             )
         SlotGroup.objects.bulk_create(object_grps)
@@ -50,7 +51,7 @@ class BookingSlotAdmin(admin.ModelAdmin):
                     seat_details = get_seat_details(seat)
                     grp_code = seat_details["seat_grp"]
                     slot_grp = SlotGroup.objects.get(
-                        slot=self, grp_code=grp_code
+                        slot=obj, grp_code=grp_code
                     )
                     bookings.append(
                         Booking(
@@ -61,7 +62,8 @@ class BookingSlotAdmin(admin.ModelAdmin):
                         )
                     )
         Booking.objects.bulk_create(bookings)
-        return super().save()
+        super().save_model(request, obj, form, change)
+
 
 admin.site.register(Movie)
 admin.site.register(MovieFormat)
