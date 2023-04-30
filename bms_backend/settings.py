@@ -162,6 +162,6 @@ GRAPHQL_JWT = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    "graphql_jwt.backends.JSONWebTokenBackend",
+    "bms_backend.backends.FirebaseGoogleWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
