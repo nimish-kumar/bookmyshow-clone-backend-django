@@ -19,6 +19,9 @@ class Genre(models.Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 
 # Create your models here.
 class Facility(models.Model):
@@ -39,8 +42,8 @@ class Facility(models.Model):
         ]
         verbose_name_plural = "Facilities"
 
-
-ordering = ["-id"]
+    def __str__(self):
+        return f"{self.name}"
 
 
 class Tag(models.Model):
