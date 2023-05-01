@@ -13,8 +13,8 @@ class UpdateUserDetails(graphene.Mutation):
         profile_image_url = graphene.String()
 
     @login_required
-    def resolve(
-        self,
+    def mutate(
+        root,
         info,
         first_name=None,
         last_name=None,
