@@ -19,7 +19,7 @@ class User(AbstractUser):
         choices=ReviewerType.choices,
         default=ReviewerType.user,
     )
-
+    profile_image_url = models.URLField(blank=True, null=True)
     objects = UserManager()
 
     USERNAME_FIELD = "email"
