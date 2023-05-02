@@ -1,11 +1,11 @@
 import graphene
 from django.db import transaction
 from graphql_jwt.decorators import login_required
-
 from .types import BookingType
 from ..models import Booking, Screen, BookingSlot, SlotGroup
 from ..constants import BookingStatus, SeatStatus
 from ..utils import get_seat_details, create_seat
+from django.utils import timezone
 
 
 class InitiateBookingTicket(graphene.Mutation):
@@ -171,7 +171,8 @@ class DirectBookingTicket(graphene.Mutation):
         for booking in bookings:
             booking.user = active_user
             booking.status = BookingStatus.BOOKED
-        Booking.objects.bulk_update(bookings, ["user", "status"])
+            booking.booked_at = timezone.now()
+        Booking.objects.bulk_update(bookings, ["user", "status", "booked_at"])
 
         # Update count of remaining seats
         slot_grps = list(SlotGroup.objects.filter(slot=booking_slot))
