@@ -21,6 +21,7 @@ class PaginatorBookingResolver:
                 "slot_grp__slot__format",
                 "slot_grp__slot__screen__theatre",
             )
+            .order_by("-booked_at")
             .all(),
             limit,
         )
@@ -46,7 +47,6 @@ class PaginatorBookingResolver:
 
 
 class PaginatedMoviesDetailsResolver:
-
     @login_required
     def __call__(self, root, info, page: int, limit: int, city):
         movie_langs = list(
@@ -67,7 +67,10 @@ class PaginatedMoviesDetailsResolver:
             if movie_id not in movie_details_dict.keys():
                 movie_details_dict[movie_id] = {lang_id: set([format_id])}
             else:
-                movie_details_dict[movie_id][lang_id].add(format_id)
+                if lang_id not in movie_details_dict[movie_id].keys():
+                    movie_details_dict[movie_id][lang_id] = set([format_id])
+                else:
+                    movie_details_dict[movie_id][lang_id].add(format_id)
 
         movies_details_list = []
         for movie_id in movie_details_dict.keys():

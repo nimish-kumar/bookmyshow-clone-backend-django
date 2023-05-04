@@ -142,7 +142,7 @@ class BookingSlot(models.Model):
         null=True,
         blank=True,
     )
-    current_layout = models.TextField(null=True, blank=True)
+    current_layout = models.TextField(null=True, blank=True, editable=False)
 
     class Meta:
         ordering = ["-id"]
@@ -154,7 +154,7 @@ class BookingSlot(models.Model):
 
 
 class SlotGroup(models.Model):
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=20)
     grp_code = models.CharField(max_length=2)
     cost = models.PositiveSmallIntegerField()
     slot = models.ForeignKey(
@@ -201,11 +201,12 @@ class Booking(models.Model):
     row = models.CharField(max_length=3)
     column = models.CharField(max_length=3)
     created_at = models.DateTimeField(auto_now_add=True)
+    booked_at = models.DateTimeField(null=True, blank=True)
     paid_amt = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         # Orders by bookings which have been recently added.
-        ordering = ["-created_at", "-id"]
+        ordering = ["-id"]
         unique_together = ["slot_grp", "row", "seat_number"]
         indexes = [
             models.Index(
