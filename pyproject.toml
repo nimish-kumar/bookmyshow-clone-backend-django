@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Backend for bookmyshow clone"
 authors = ["Nimish Kumar <nimishk642@gmail.com>"]
 readme = "README.md"
-packages = [{include = "bookmyshow_clone_backend_django"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
