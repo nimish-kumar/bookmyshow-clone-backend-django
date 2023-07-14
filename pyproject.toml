@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-django = "^4.1.6"
+django = "^4.1.10"
 django-fsm = "^2.8.1"
 graphene-django = "^3.0.0"
 firebase-admin = "^6.1.0"
